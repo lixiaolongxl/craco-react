@@ -64,8 +64,8 @@ module.exports = {
             new CopyWebpackPlugin({
                 patterns: [
                     {
-                        from: path.join(__dirname, '/public/media'),//打包的静态资源目录地址
-                        to: './media' //打包到dist下面的public
+                        from: path.join(__dirname, '/public/file'),//打包的静态资源目录地址
+                        to: './file' //打包到dist下面的public
                     }
                 ]
     
