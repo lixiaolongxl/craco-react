@@ -3,7 +3,14 @@ const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin')
 const { when, whenDev, whenProd, whenCI, whenTest, ESLINT_MODES, POSTCSS_MODES } = require("@craco/craco");
 const CompressionWebpackPlugin = require('compression-webpack-plugin')
 const path = require('path')
+const DashboardPlugin = require('webpack-dashboard/plugin')
+const CircularDependencyPlugin = require('circular-dependency-plugin')
+const webpack = require('webpack')
+const {
+    BundleAnalyzerPlugin
+} = require('webpack-bundle-analyzer')
 const lessModuleRegex = /\.module\.less$/;
+const WebpackBar = require('webpackbar')
 module.exports = {
     reactScriptsVersion: "react-scripts",/* (default value) */
     webpack: {
@@ -46,6 +53,31 @@ module.exports = {
             return webpackConfig;
         },
         plugins: [
+            new WebpackBar({
+                profile: true
+            }),
+            ...whenDev(
+                () => [
+                    new CircularDependencyPlugin({
+                        exclude: /node_modules/,
+                        include: /src/,
+                        failOnError: true,
+                        allowAsyncCycles: false,
+                        cwd: process.cwd()
+                    }),
+                    new DashboardPlugin(),
+                    new webpack.HotModuleReplacementPlugin()
+                ], []
+            ),
+            ...when(
+                isBuildAnalyzer, () => [
+                    new BundleAnalyzerPlugin({
+                        analyzerMode: 'static', // html 文件方式输出编译分析
+                        openAnalyzer: false,
+                        reportFilename: path.resolve(__dirname, `analyzer/index.html`)
+                    })
+                ], []
+            ),
             ...whenProd( //生产环境
                 () => [
                     // 打压缩包
