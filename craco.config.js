@@ -3,14 +3,19 @@ const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin')
 const { when, whenDev, whenProd, whenCI, whenTest, ESLINT_MODES, POSTCSS_MODES } = require("@craco/craco");
 const CompressionWebpackPlugin = require('compression-webpack-plugin')
 const path = require('path')
+const friendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const DashboardPlugin = require('webpack-dashboard/plugin')
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const webpack = require('webpack')
 const {
     BundleAnalyzerPlugin
 } = require('webpack-bundle-analyzer')
-const lessModuleRegex = /\.module\.less$/;
+const {
+    CleanWebpackPlugin
+} = require('clean-webpack-plugin')
+
 const WebpackBar = require('webpackbar')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
     reactScriptsVersion: "react-scripts",/* (default value) */
     webpack: {
@@ -56,6 +61,15 @@ module.exports = {
             new WebpackBar({
                 profile: true
             }),
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: path.join(__dirname, '/public/media'),//打包的静态资源目录地址
+                        to: './media' //打包到dist下面的public
+                    }
+                ]
+    
+            }),
             ...whenDev(
                 () => [
                     new CircularDependencyPlugin({
@@ -65,21 +79,15 @@ module.exports = {
                         allowAsyncCycles: false,
                         cwd: process.cwd()
                     }),
+                    new friendlyErrorsWebpackPlugin(),
                     new DashboardPlugin(),
                     new webpack.HotModuleReplacementPlugin()
                 ], []
             ),
-            ...when(
-                isBuildAnalyzer, () => [
-                    new BundleAnalyzerPlugin({
-                        analyzerMode: 'static', // html 文件方式输出编译分析
-                        openAnalyzer: false,
-                        reportFilename: path.resolve(__dirname, `analyzer/index.html`)
-                    })
-                ], []
-            ),
+            
             ...whenProd( //生产环境
                 () => [
+                    new CleanWebpackPlugin(),
                     // 打压缩包
                     new CompressionWebpackPlugin({
                         algorithm: 'gzip',
@@ -88,6 +96,11 @@ module.exports = {
                         minRatio: 0.8
                     }),
                     new SimpleProgressWebpackPlugin(),
+                    new BundleAnalyzerPlugin({
+                        analyzerMode: 'static', // html 文件方式输出编译分析
+                        openAnalyzer: false,
+                        reportFilename: path.resolve(__dirname, `analyzer/index.html`)
+                    })
                 ], []
             )
         ]
