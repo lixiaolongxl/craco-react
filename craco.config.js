@@ -1,6 +1,6 @@
 const CracoLessPlugin = require('craco-less');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin')
-const { when, whenDev, whenProd, whenCI, whenTest, ESLINT_MODES, POSTCSS_MODES } = require("@craco/craco");
+const { when, whenDev, whenProd, whenCI, whenTest, ESLINT_MODES, POSTCSS_MODES, loaderByName } = require("@craco/craco");
 const CompressionWebpackPlugin = require('compression-webpack-plugin')
 const path = require('path')
 const friendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
@@ -13,7 +13,7 @@ const {
 const {
     CleanWebpackPlugin
 } = require('clean-webpack-plugin')
-
+const lessModuleRegex = /\.module\.less$/;
 const WebpackBar = require('webpackbar')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
@@ -23,7 +23,9 @@ module.exports = {
             '@': path.resolve(__dirname, 'src'),
             '@components': path.resolve(__dirname, 'src/components'),
             '@pages': path.resolve(__dirname, 'src/pages'),
-            '@utils': path.resolve(__dirname, 'src/utils')
+            '@utils': path.resolve(__dirname, 'src/utils'),
+            '@api': path.resolve(__dirname, 'src/api'),
+            '@type': path.resolve(__dirname, 'src/type')
         },
         //抽离公用模块
         optimization: {
@@ -68,10 +70,11 @@ module.exports = {
                         to: './file' //打包到dist下面的public
                     }
                 ]
-    
+
             }),
             ...whenDev(
                 () => [
+                    // 文件依赖
                     new CircularDependencyPlugin({
                         exclude: /node_modules/,
                         include: /src/,
@@ -79,15 +82,26 @@ module.exports = {
                         allowAsyncCycles: false,
                         cwd: process.cwd()
                     }),
+                    // 错误友好提示
                     new friendlyErrorsWebpackPlugin(),
+                    // 显示webpack构建
                     new DashboardPlugin(),
+                    // 热更新
                     new webpack.HotModuleReplacementPlugin()
                 ], []
             ),
-            
+
             ...whenProd( //生产环境
                 () => [
+                    // 清空文件
                     new CleanWebpackPlugin(),
+                    // x限制js 文件大小 ?移动端开启
+                    new webpack.optimize.AggressiveSplittingPlugin({
+                        minSize: 30720, // 字节，分割点。默认：30720
+                        maxSize: 51200, // 字节，每个文件最大字节。默认：51200
+                        chunkOverhead: 0, // 默认：0
+                        entryChunkMultiplicator: 1, // 默认：1
+                    }),
                     // 打压缩包
                     new CompressionWebpackPlugin({
                         algorithm: 'gzip',
@@ -95,7 +109,9 @@ module.exports = {
                         threshold: 1024,
                         minRatio: 0.8
                     }),
+                    // 打包进度
                     new SimpleProgressWebpackPlugin(),
+                    // 打包分析
                     new BundleAnalyzerPlugin({
                         analyzerMode: 'static', // html 文件方式输出编译分析
                         openAnalyzer: false,
@@ -115,7 +131,8 @@ module.exports = {
                         modifyVars: { '@primary-color': '#1DA57A' },
                         javascriptEnabled: true,
                     },
-                }
+                },
+                
             },
         },
     ],
