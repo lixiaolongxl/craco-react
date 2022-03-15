@@ -26,7 +26,8 @@ module.exports = {
             '@utils': path.resolve(__dirname, 'src/utils'),
             '@api': path.resolve(__dirname, 'src/api'),
             '@type': path.resolve(__dirname, 'src/type'),
-            '@img': path.resolve(__dirname, 'src/static/imges')
+            '@img': path.resolve(__dirname, 'src/static/imges'),
+            '@style':path.resolve(__dirname, 'src/style'),
         },
         //抽离公用模块
         optimization: {
@@ -97,12 +98,12 @@ module.exports = {
                     // 清空文件
                     new CleanWebpackPlugin(),
                     // x限制js 文件大小 ?移动端开启
-                    new webpack.optimize.AggressiveSplittingPlugin({
-                        minSize: 30720, // 字节，分割点。默认：30720
-                        maxSize: 51200, // 字节，每个文件最大字节。默认：51200
-                        chunkOverhead: 0, // 默认：0
-                        entryChunkMultiplicator: 1, // 默认：1
-                    }),
+                    // new webpack.optimize.AggressiveSplittingPlugin({
+                    //     minSize: 30720, // 字节，分割点。默认：30720
+                    //     maxSize: 51200, // 字节，每个文件最大字节。默认：51200
+                    //     chunkOverhead: 0, // 默认：0
+                    //     entryChunkMultiplicator: 1, // 默认：1
+                    // }),
                     // 打压缩包
                     new CompressionWebpackPlugin({
                         algorithm: 'gzip',
