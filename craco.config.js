@@ -25,7 +25,8 @@ module.exports = {
             '@pages': path.resolve(__dirname, 'src/pages'),
             '@utils': path.resolve(__dirname, 'src/utils'),
             '@api': path.resolve(__dirname, 'src/api'),
-            '@type': path.resolve(__dirname, 'src/type')
+            '@type': path.resolve(__dirname, 'src/type'),
+            '@img': path.resolve(__dirname, 'src/static/imges')
         },
         //抽离公用模块
         optimization: {
