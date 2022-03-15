@@ -40,7 +40,6 @@ service.interceptors.response.use((response: AxiosResponse) => {
             message.error({
                 content: res.msg,
                 // duration: 100,
-                className: 'custom-class',
 
             });
             // message.error(res.msg, 100);
